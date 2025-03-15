@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Dorks</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e1e1e, #2d2d2d);
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+        }
+
+        .container {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        h1 {
+            color: #00ff9d;
+            margin-bottom: 1.5rem;
+            font-size: 2.5em;
+            text-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
+        }
+
+        .btn {
+            background: #00ff9d;
+            color: #1a1a1a;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            background: #00cc7a;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 157, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .warning {
+            margin-top: 20px;
+            color: #ff4444;
+            font-size: 0.9em;
+            max-width: 400px;
+        }
+
+        .instructions {
+            color: #00ff9d;
+            font-size: 0.8em;
+            margin-top: 15px;
+            border: 1px solid #00ff9d;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .progress {
+            margin-top: 15px;
+            color: #00ff9d;
+            font-size: 1em;
+        }
+
+        .error {
+            margin-top: 10px;
+            color: #ff4444;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Dork Launcher</h1>
+        <button class="btn" onclick="iniciarDorks()">Ativar Dorks</button>
+        <div class="warning">
+            <p>⚠️ Permissões necessárias:</p>
+            <p>1. Clique no ícone de cadeado → Permitir pop-ups</p>
+            <p>2. Execute em uma janela privativa (Ctrl+Shift+P)</p>
+            <p>3. Mantenha o Firefox em primeiro plano</p>
+        </div>
+        <div class="instructions">
+            Dica: Clique apenas uma vez e aguarde!
+        </div>
+        <div class="progress" id="progress"></div>
+    </div>
+
+    <script>
+        // Lista de dorks codificadas para URL
+        const dorks = [
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22x.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22xx.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22z.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22zz.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22w.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22ww.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22nf.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22jd.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22nf.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22nr.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22log.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22br.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22my.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22st.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22nt.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22eg.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22jg.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22kf.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22wh.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22jn.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22wp-.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22ok.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22lou.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22fx.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22cgi.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22tor.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22up1.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22index.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22index1.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22pn.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22temp.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22cd.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22upload.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22vx.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22wso.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22bd.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22ls.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22dl.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%2212.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22adm.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22x1.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22x2.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22z1.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22w1.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%222index.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22info.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22Ai.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22pic.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22foto.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22load.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22jpg.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22pi.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22ini.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22ht.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22zzz.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22ic.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22pdf.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22pjpeg.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22xu.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22ix.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22sn.php%22%20%2B%202025",
+            "https://www.google.com/search?q=intitle:%22index/of%22%20intext:cgi-bin%20%2B%20%22rn.php%22%20%2B%202025"
+        ];
+
+        // Elementos da interface
+        const progressElement = document.getElementById("progress");
+
+        // Contornar bloqueio de pop-ups
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('btn')) {
+                window.open('//about:blank', '_blank');
+            }
+        }, false);
+
+        async function abrirDorks(maxDorks) {
+            const configFirefox = {
+                private: 1,
+                menubar: 0,
+                toolbar: 0,
+                location: 0,
+                status: 0,
+                resizable: 1
+            };
+
+            for (let i = 0; i < Math.min(maxDorks, dorks.length); i++) {
+                try {
+                    progressElement.textContent = `Abrindo ${i + 1mey de ${maxDorks}...`;
+                    window.open(
+                        dorks[i],
+                        `dorkWindow${i}`,
+                        Object.entries(configFirefox).map(([key, val]) => `${key}=${val}`).join(',') +
+                        `,width=${Math.floor(window.screen.width/2)},height=${window.screen.height},` +
+                        `left=${Math.floor(window.screen.width/2)},top=0`
+                    );
+
+                    // Intervalo entre aberturas
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                } catch (error) {
+                    console.error(`Erro na dork ${i + 1}:`, error);
+                    const errorMsg = document.createElement("p");
+                    errorMsg.textContent = `Erro na dork ${i + 1}: ${error.message}`;
+                    errorMsg.className = "error";
+                    document.querySelector(".container").appendChild(errorMsg);
+                }
+            }
+            progressElement.textContent = "Concluído!";
+        }
+
+        function iniciarDorks() {
+            if (!confirm("Permitir abertura de múltiplas janelas?")) return;
+            const maxDorks = prompt("Quantos dorks abrir? (máximo: " + dorks.length + ")", dorks.length);
+            if (maxDorks && !isNaN(maxDorks) && maxDorks > 0) {
+                abrirDorks(parseInt(maxDorks));
+            } else {
+                alert("Por favor, insira um número válido.");
+            }
+        }
+    </script>
+</body>
+</html>
